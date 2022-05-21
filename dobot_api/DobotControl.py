@@ -14,6 +14,13 @@ CON_STR = {
     dType.DobotConnect.DobotConnect_NoError:  "DobotConnect_NoError",
     dType.DobotConnect.DobotConnect_NotFound: "DobotConnect_NotFound",
     dType.DobotConnect.DobotConnect_Occupied: "DobotConnect_Occupied"}
+OFFSET_X = 177
+OFFSET_Y = 1
+BIG_STEP = 10
+MID_STEP = 20
+LOW_STEP = 30
+WS_OFFSET_X = 245
+WS_OFFSET_Y = 4
 
 
 class DobotControl:
@@ -69,7 +76,7 @@ class DobotControl:
         return x, y, z, rHead
 
 
-    def spiral(self):
+    def spiral(self, step=30):
         """
         Returns trajectory points in the form of spiral
 
@@ -78,8 +85,8 @@ class DobotControl:
         """
         theta = np.radians(np.linspace(50, 360*5, 10000))
         r = theta**2
-        x_2 = r*np.cos(30*theta)/30
-        y_2 = r*np.sin(30*theta)/30
+        x_2 = r*np.cos(step*theta)/30
+        y_2 = r*np.sin(step*theta)/30
 
         plt.figure(figsize=[10, 10])
         plt.plot(x_2, y_2)
@@ -97,11 +104,41 @@ class DobotControl:
         x_2_list_offset = []
         y_2_list_offset = []
         for i in range(0,len(x_2_list)-1,1):
-            x_2_list_offset.append((x_2_list[i] + 250))
-            y_2_list_offset.append(y_2_list[i])
+            x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
+            y_2_list_offset.append(y_2_list[i] + WS_OFFSET_Y)
             i+=i
         x_2_list_offset.reverse()
         y_2_list_offset.reverse()
+        return x_2_list_offset, y_2_list_offset
+
+    def triangle(self, step=30):
+        """
+        Returns trajectory points in the form of traingle
+        :param step:
+        :return:
+         """
+        x1 = [0, -30, 30]
+        y1 = [-26, 30, 30]
+        x2 = []
+        y2 = []
+        offset = 0
+        for i in range(0, 20):
+            for j in range(0, len(x1)):
+                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
+                    x1[j] + offset * 2)
+                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
+                    y1[j] + offset)
+            offset += 0.5
+        print(x2)
+        print(y2)
+        plt.figure(figsize=[10, 10])
+        plt.plot(x2, y2)
+        x_2_list_offset = []
+        y_2_list_offset = []
+        for i in range(0, len(x2) - 1, 1):
+            x_2_list_offset.append((x2[i] + WS_OFFSET_X))
+            y_2_list_offset.append(y2[i])
+            i += i
         return x_2_list_offset, y_2_list_offset
 
     def execute_trajectory(self, x_pos, y_pos):
@@ -118,7 +155,7 @@ class DobotControl:
             else:
                 offset = -50"""
             # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - x + 180, y_pos[i], 135 - 212 - 0.002 * (i - 1), rHead, isQueued=1)[0]
+            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 212 - 0.002 * (i - 1), rHead, isQueued=1)[0]
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -130,6 +167,12 @@ class DobotControl:
         # Stop to Execute Command Queued
         dType.SetQueuedCmdStopExec(api)
 
+    def show_plot(self, function, plot):
+        if function == "spiral":
+            plt.plot(self.spiral())
+            plt.show()
+
+
 
 if __name__ == '__main__':
     dobot = DobotControl()
@@ -137,7 +180,8 @@ if __name__ == '__main__':
 
     if (state == dType.DobotConnect.DobotConnect_NoError):
         x, y, z, rHead = dobot.home_setup(api)
-        x_2_list_offset, y_2_list_offset = dobot.spiral()
+        x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP)
+        #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset)
     dType.DisconnectDobot(api)
 

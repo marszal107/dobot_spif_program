@@ -10,10 +10,10 @@ import math
 
 
 def spirala():
-    theta = np.radians(np.linspace(50, 360*5, 5000))
+    theta = np.radians(np.linspace(50, 360*5, 10000))
     r = theta**2
-    x_2 = r*np.cos(30*theta)/30
-    y_2 = r*np.sin(30*theta)/30
+    x_2 = r*np.cos(10*theta)/30
+    y_2 = r*np.sin(10*theta)/30
 
     plt.figure(figsize=[10, 10])
     plt.plot(x_2, y_2)
@@ -39,6 +39,26 @@ def spirala():
     print(x_2_list_popr[1] + 270 -200)
     return xy_2_list
 
+def triangle():
+    """
+    Returns trajectory points in the form of traingle
+    :param step:
+    :return:
+     """
+    x1=[0, -30, 30]
+    y1=[-26, 30, 30]
+    x2=[]
+    y2=[]
+    offset = 0
+    for i in range(0,20):
+        for j in range(0,len(x1)):
+            x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset*2) if x1[j]>0 else x2.append(x1[j]+offset*2)
+            y2.append(y1[j]+offset*2) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
+        offset+=0.5
+    print(x2)
+    print(y2)
+    plt.figure(figsize=[10, 10])
+    plt.plot(x2, y2)
 
 def connect_to_robot():
     available_ports = list_ports.comports()
@@ -61,7 +81,11 @@ def connect_to_robot():
         i+=i
 
     device.close()
-spirala()
+
+if __name__ == "__main__":
+    #spirala()
+    triangle()
+    plt.show()
 #connect_to_robot()
 """
 errors_list = []
@@ -85,5 +109,5 @@ for i in range(len(robot_responses)):
 plt.figure(figsize=[10, 10])
 plt.plot(x_robot_responses, y_robot_responses)
 """
-plt.show()
+
 
