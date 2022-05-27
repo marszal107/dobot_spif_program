@@ -9,6 +9,8 @@ import pydobot
 from serial.tools import list_ports
 import math
 import time
+import os
+
 
 CON_STR = {
     dType.DobotConnect.DobotConnect_NoError:  "DobotConnect_NoError",
@@ -18,8 +20,8 @@ OFFSET_X = 177
 OFFSET_Y = 1
 BIG_STEP = 10
 MID_STEP = 20
-LOW_STEP = 30
-WS_OFFSET_X = 245
+LOW_STEP = 50
+WS_OFFSET_X = 185
 WS_OFFSET_Y = 4
 
 
@@ -54,10 +56,10 @@ class DobotControl:
 
         # Async Motion Params Setting
         dType.SetHOMEParams(api, 200, 200, 200, 200, isQueued=1)
-        dType.SetPTPCoordinateParams(api, 200, 200, 200, 200)
+        dType.SetPTPCoordinateParams(api, 50, 50, 50, 50)
         dType.SetPTPJumpParams(api, 10, 200)
-        dType.SetPTPCommonParams(api, 100, 100)
-        dType.SetCPParams(api, 50, 50, 50, 0, 0)
+        dType.SetPTPCommonParams(api, 10, 100)
+        dType.SetCPParams(api, 10, 10, 10, 0, 0)
 
         # Async Home
         dType.SetHOMECmd(api, temp=0, isQueued=1)
@@ -85,10 +87,10 @@ class DobotControl:
         """
         theta = np.radians(np.linspace(50, 360*5, 10000))
         r = theta**2
-        x_2 = r*np.cos(step*theta)/30
-        y_2 = r*np.sin(step*theta)/30
+        x_2 = r*np.cos(step*theta)/40
+        y_2 = r*np.sin(step*theta)/40
 
-        plt.figure(figsize=[10, 10])
+        plt.figure(figsize=[5, 5])
         plt.plot(x_2, y_2)
 
         x_2_list = x_2.tolist()
@@ -105,7 +107,7 @@ class DobotControl:
         y_2_list_offset = []
         for i in range(0,len(x_2_list)-1,1):
             x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y_2_list[i] + WS_OFFSET_Y)
+            y_2_list_offset.append(y_2_list[i]*2/3)
             i+=i
         x_2_list_offset.reverse()
         y_2_list_offset.reverse()
@@ -117,26 +119,54 @@ class DobotControl:
         :param step:
         :return:
          """
-        x1 = [0, -30, 30]
-        y1 = [-26, 30, 30]
+        x1 = [0, -12, 12]
+        y1 = [-9, 12, 12]
         x2 = []
         y2 = []
         offset = 0
-        for i in range(0, 20):
+        for i in range(0, 200):
             for j in range(0, len(x1)):
                 x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
                     x1[j] + offset * 2)
                 y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
                     y1[j] + offset)
-            offset += 0.5
+            offset += 0.05
         print(x2)
         print(y2)
-        plt.figure(figsize=[10, 10])
+        plt.figure(figsize=[5, 5])
         plt.plot(x2, y2)
         x_2_list_offset = []
         y_2_list_offset = []
         for i in range(0, len(x2) - 1, 1):
             x_2_list_offset.append((x2[i] + WS_OFFSET_X))
+            y_2_list_offset.append(y2[i] - WS_OFFSET_Y)
+            i += i
+        return x_2_list_offset, y_2_list_offset
+
+    def square(self, step=30):
+        """
+        Returns trajectory points in the form of square
+        :param step:
+        :return:
+        """
+        x1=[-20, -20, 20, 20]
+        y1=[-20, 20, 20, -20]
+        x2=[]
+        y2=[]
+        offset = 0
+        for i in range(0,20):
+            for j in range(0,len(x1)):
+                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
+                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
+            offset+=0.5
+        print(x2)
+        print(y2)
+        plt.figure(figsize=[5, 5])
+        plt.plot(x2, y2)
+        x_2_list_offset = []
+        y_2_list_offset = []
+        for i in range(0, len(x2) - 1, 1):
+            x_2_list_offset.append(x2[i] + WS_OFFSET_X)
             y_2_list_offset.append(y2[i])
             i += i
         return x_2_list_offset, y_2_list_offset
@@ -155,7 +185,7 @@ class DobotControl:
             else:
                 offset = -50"""
             # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 212 - 0.002 * (i - 1), rHead, isQueued=1)[0]
+            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 222 -5 - 0.3 * (i - 1), rHead, isQueued=1)[0]
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -175,6 +205,7 @@ class DobotControl:
 
 
 if __name__ == '__main__':
+    
     dobot = DobotControl()
     api, state = dobot.establish_connection(port="COM3", baudrate=115200)
 
@@ -182,6 +213,9 @@ if __name__ == '__main__':
         x, y, z, rHead = dobot.home_setup(api)
         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP)
         #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
+        #x_2_list_offset, y_2_list_offset = dobot.square(step=LOW_STEP)
+        print(x_2_list_offset[0])
+        print(y_2_list_offset[0])
         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset)
     dType.DisconnectDobot(api)
 
