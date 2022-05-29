@@ -96,11 +96,15 @@ class Ui_MainWindow(object):
         self.graphicsView.setGeometry(QtCore.QRect(310, 10, 431, 421))
         self.graphicsView.setObjectName("graphicsView")
         self.estop_button = QtWidgets.QPushButton(self.centralwidget)
-        self.estop_button.setGeometry(QtCore.QRect(10, 390, 101, 31))
+        self.estop_button.setGeometry(QtCore.QRect(170, 370, 101, 31))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.estop_button.setFont(font)
+        self.estop_button.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         self.estop_button.setAutoFillBackground(False)
+        self.estop_button.setStyleSheet("background-color:red;\n"
+"color:white;\n"
+"")
         self.estop_button.setObjectName("estop_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)

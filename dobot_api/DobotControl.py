@@ -49,7 +49,7 @@ class DobotControl:
         print("Connect status:", CON_STR[state])
         return state
 
-    def home_setup(self, api):
+    def home_setup(self, api, vel, acc):
         """
         Returns current pose of end effector after homing
         :param api:
@@ -60,10 +60,10 @@ class DobotControl:
 
         # Async Motion Params Setting
         dType.SetHOMEParams(api, 200, 200, 200, 200, isQueued=1)
-        dType.SetPTPCoordinateParams(api, 200, 200, 200, 200)
+        dType.SetPTPCoordinateParams(api, vel, acc, vel, acc)
         dType.SetPTPJumpParams(api, 10, 200)
         dType.SetPTPCommonParams(api, 100, 100)
-        dType.SetCPParams(api, 50, 50, 50, 0, 0)
+        dType.SetCPParams(api, acc/4, vel/4, acc/4, 0, 0)
 
         # Async Home
         dType.SetHOMECmd(api, temp=0, isQueued=1)
@@ -230,7 +230,9 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.estop_button.clicked.connect(self.estop_click_event)
 
     def home_click_event(self):
-        self.dobot.home_setup(self.api)
+        vel = int(self.ui.velocity_line.text())
+        acc = int(self.ui.acceleration_line.text())
+        self.dobot.home_setup(self.api, vel, acc)
 
     def connect_click_event(self):
         port = self.ui.port_line.text()
@@ -261,13 +263,6 @@ class DobotMainWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
-    # app = QtWidgets.QApplication(sys.argv)
-    # MainWindow = QtWidgets.QMainWindow()
-    # ui = DobotMainWindow()
-    # #ui_extension = DobotMainWindow()
-    # ui.setupUi(MainWindow)
-    # MainWindow.show()
-    # sys.exit(app.exec_())
     app = QtWidgets.QApplication(sys.argv)
     w = DobotMainWindow()
     w.show()
