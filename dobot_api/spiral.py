@@ -10,10 +10,10 @@ import math
 
 
 def spirala():
-    theta = np.radians(np.linspace(50, 360*5, 10000))
-    r = theta**2
-    x_2 = r*np.cos(20*theta)/120
-    y_2 = r*np.sin(20*theta)/40
+    theta = np.radians(np.linspace(50, 360 * 5, 10000))
+    r = theta ** 2
+    x_2 = r * np.cos(1/0.3 * theta) / 30
+    y_2 = r * np.sin(1/0.3 * theta) / 30
 
     plt.figure(figsize=[5, 5])
     plt.plot(x_2, y_2)
@@ -107,8 +107,8 @@ def connect_to_robot():
     device.close()
 
 if __name__ == "__main__":
-    #spirala()
-    triangle()
+    spirala()
+    #triangle()
     #square()
     plt.show()
 #connect_to_robot()
