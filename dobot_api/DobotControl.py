@@ -228,11 +228,16 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.plan_button.clicked.connect(self.plan_click_event)
         self.ui.execute_button.clicked.connect(self.execute_click_event)
         self.ui.estop_button.clicked.connect(self.estop_click_event)
+        self.ui.show_button.clicked.connect(self.show_click_event)
+        self.ui.graphicsView.
 
     def home_click_event(self):
-        vel = int(self.ui.velocity_line.text())
-        acc = int(self.ui.acceleration_line.text())
-        self.dobot.home_setup(self.api, vel, acc)
+        if (self.state == dType.DobotConnect.DobotConnect_NoError):
+            vel = int(self.ui.velocity_line.text())
+            acc = int(self.ui.acceleration_line.text())
+            self.dobot.home_setup(self.api, vel, acc)
+        else:
+            print("[ERROR] Robot not connected")
 
     def connect_click_event(self):
         port = self.ui.port_line.text()
@@ -256,10 +261,18 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         x_list, y_list = self.plan_click_event()
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
             self.dobot.execute_trajectory(x_list, y_list, self.api)
-        dType.DisconnectDobot(self.api)
+        else:
+            print("[ERROR] Robot not connected")
+        #dType.DisconnectDobot(self.api)
 
     def estop_click_event(self):
-        self.dobot.emergency_stop(self.api)
+        if (self.state == dType.DobotConnect.DobotConnect_NoError):
+            self.dobot.emergency_stop(self.api)
+        else:
+            print("[ERROR] Robot not connected")
+
+    def show_click_event(self):
+
 
 
 if __name__ == "__main__":
