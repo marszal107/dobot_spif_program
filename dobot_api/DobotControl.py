@@ -93,8 +93,8 @@ class DobotControl:
         x_2 = r*np.cos(1/step*theta)/(diameter/2)
         y_2 = r*np.sin(1/step*theta)/(diameter/2)
 
-        plt.figure(figsize=[10, 10])
-        plt.plot(x_2, y_2)
+        # plt.figure(figsize=[5, 5])
+        # plt.plot(x_2, y_2)
 
         x_2_list = x_2.tolist()
         y_2_list = y_2.tolist()
@@ -115,6 +115,26 @@ class DobotControl:
         x_2_list_offset.reverse()
         y_2_list_offset.reverse()
         return x_2_list_offset, y_2_list_offset
+
+    def spiral_plot(self, step, diameter):
+        """
+        Returns trajectory points in the form of spiral
+
+        :return:
+        list x, y
+        """
+        theta = np.radians(np.linspace(50, 360 * 5, 10000))
+        r = theta ** 2
+        x_2 = r * np.cos(1 / step * theta) / (diameter / 2)
+        y_2 = r * np.sin(1 / step * theta) / (diameter / 2)
+
+        plt.figure(figsize=[5, 5])
+        plt.plot(x_2, y_2)
+
+        x_2_list = x_2.tolist()
+        y_2_list = y_2.tolist()
+
+        return x_2_list, y_2_list
 
     def triangle(self, step, diameter):
         """
@@ -138,8 +158,8 @@ class DobotControl:
             offset += step
         #print(x2)
         #print(y2)
-        plt.figure(figsize=[10, 10])
-        plt.plot(x2, y2)
+        # plt.figure(figsize=[5, 5])
+        # plt.plot(x2, y2)
         x_2_list_offset = []
         y_2_list_offset = []
         for i in range(0, len(x2) - 1, 1):
@@ -147,6 +167,32 @@ class DobotControl:
             y_2_list_offset.append(y2[i])
             i += i
         return x_2_list_offset, y_2_list_offset
+
+    def triangle_plot(self, step, diameter):
+        """
+        Returns trajectory points in the form of traingle
+        :param step:
+        :return:
+         """
+
+        x1 = [0, -diameter/2, diameter/2]
+        y1 = [-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2]
+        print(y1)
+        x2 = []
+        y2 = []
+        offset = 0
+        for i in range(0, 20):
+            for j in range(0, len(x1)):
+                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
+                    x1[j] + offset * 2)
+                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
+                    y1[j] + offset)
+            offset += step
+        #print(x2)
+        #print(y2)
+        plt.figure(figsize=[5, 5])
+        plt.plot(x2, y2)
+        return x2, y2
 
     def square(self, step, diameter):
         """
@@ -166,8 +212,8 @@ class DobotControl:
             offset += step
         #print(x2)
         #print(y2)
-        plt.figure(figsize=[5, 5])
-        plt.plot(x2, y2)
+        # plt.figure(figsize=[5, 5])
+        # plt.plot(x2, y2)
         x_2_list_offset = []
         y_2_list_offset = []
         for i in range(0, len(x2) - 1, 1):
@@ -176,7 +222,29 @@ class DobotControl:
             i += i
         return x_2_list_offset, y_2_list_offset
 
-    def execute_trajectory(self, x_pos, y_pos, api):
+    def square_plot(self, step, diameter):
+        """
+        Returns trajectory points in the form of square
+        :param step:
+        :return:
+        """
+        x1=[-diameter/2, -diameter/2, diameter/2, diameter/2]
+        y1=[-diameter/2, diameter/2, diameter/2, -diameter/2]
+        x2=[]
+        y2=[]
+        offset = 0
+        for i in range(0,20):
+            for j in range(0,len(x1)):
+                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
+                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
+            offset += step
+        #print(x2)
+        #print(y2)
+        plt.figure(figsize=[5, 5])
+        plt.plot(x2, y2)
+        return x2, y2
+
+    def execute_trajectory(self, x_pos, y_pos, api, zstep):
         """
         Executes given trajectory via points
         :param x_pos:
@@ -191,7 +259,7 @@ class DobotControl:
             else:
                 offset = -50"""
             # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 212 - 0.002 * (i - 1), rHead, isQueued=1)[0]
+            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 212 - zstep * (i - 1), rHead, isQueued=1)[0]
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -203,10 +271,18 @@ class DobotControl:
         # Stop to Execute Command Queued
         dType.SetQueuedCmdStopExec(api)
 
-    def show_plot(self, function, plot):
-        if function == "spiral":
-            plt.plot(self.spiral())
+    def show_plot(self, function, step, diameter):
+        if function == "Spiral":
+            plt.plot(self.spiral_plot(step, diameter))
             plt.show()
+        elif function == "Triangle":
+            plt.plot(self.triangle_plot(step, diameter))
+            plt.show()
+        elif function == "Square":
+            plt.plot(self.square_plot(step, diameter))
+            plt.show()
+        else:
+            pass
 
     def emergency_stop(self, api):
         #SetQueuedCmdForceStopExec
@@ -229,7 +305,6 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.execute_button.clicked.connect(self.execute_click_event)
         self.ui.estop_button.clicked.connect(self.estop_click_event)
         self.ui.show_button.clicked.connect(self.show_click_event)
-        self.ui.graphicsView.
 
     def home_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
@@ -259,8 +334,9 @@ class DobotMainWindow(QtWidgets.QMainWindow):
 
     def execute_click_event(self):
         x_list, y_list = self.plan_click_event()
+        zstep = float(self.ui.zstep_line.text())
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.execute_trajectory(x_list, y_list, self.api)
+            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
         else:
             print("[ERROR] Robot not connected")
         #dType.DisconnectDobot(self.api)
@@ -272,7 +348,17 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             print("[ERROR] Robot not connected")
 
     def show_click_event(self):
+        xystep = float(self.ui.xystep_line.text())
+        diameter = float(self.ui.diameter_line.text())
 
+        if self.ui.shapeComboBox.currentText() == "Spiral":
+            self.dobot.show_plot("Spiral", xystep, diameter)
+        elif self.ui.shapeComboBox.currentText() == "Triangle":
+            self.dobot.show_plot("Triangle", xystep, diameter)
+        elif self.ui.shapeComboBox.currentText() == "Square":
+            self.dobot.show_plot("Square", xystep, diameter)
+        else:
+            pass
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(791, 476)
+        MainWindow.resize(292, 476)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.setupGroupBox = QtWidgets.QGroupBox(self.centralwidget)
@@ -92,9 +92,6 @@ class Ui_MainWindow(object):
         self.diameter_line = QtWidgets.QLineEdit(self.trajectoryGroupBox)
         self.diameter_line.setGeometry(QtCore.QRect(90, 110, 71, 20))
         self.diameter_line.setObjectName("diameter_line")
-        self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(310, 10, 431, 421))
-        self.graphicsView.setObjectName("graphicsView")
         self.estop_button = QtWidgets.QPushButton(self.centralwidget)
         self.estop_button.setGeometry(QtCore.QRect(170, 370, 101, 31))
         font = QtGui.QFont()
@@ -108,7 +105,7 @@ class Ui_MainWindow(object):
         self.estop_button.setObjectName("estop_button")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 791, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 292, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
