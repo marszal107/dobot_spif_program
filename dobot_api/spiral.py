@@ -12,8 +12,8 @@ import math
 def spirala():
     theta = np.radians(np.linspace(50, 360 * 5, 10000))
     r = theta ** 2
-    x_2 = r * np.cos(1/0.3 * theta) / 30
-    y_2 = r * np.sin(1/0.3 * theta) / 30
+    x_2 = r * np.cos(1/0.3 * theta) * 60/ 900
+    y_2 = r * np.sin(1/0.3 * theta) *60/ 900
 
     plt.figure(figsize=[5, 5])
     plt.plot(x_2, y_2)

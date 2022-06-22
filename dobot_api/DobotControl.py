@@ -90,8 +90,8 @@ class DobotControl:
         """
         theta = np.radians(np.linspace(50, 360*5, 10000))
         r = theta**2
-        x_2 = r*np.cos(1/step*theta)/(diameter/2)
-        y_2 = r*np.sin(1/step*theta)/(diameter/2)
+        x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
+        y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
 
         # plt.figure(figsize=[5, 5])
         # plt.plot(x_2, y_2)
@@ -244,7 +244,7 @@ class DobotControl:
         plt.plot(x2, y2)
         return x2, y2
 
-    def execute_trajectory(self, x_pos, y_pos, api, zstep):
+    def execute_trajectory(self, x_pos, y_pos, api, zstep, tool_length):
         """
         Executes given trajectory via points
         :param x_pos:
@@ -259,7 +259,7 @@ class DobotControl:
             else:
                 offset = -50"""
             # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], 135 - 212 - zstep * (i - 1), rHead, isQueued=1)[0]
+            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], -62 + tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -335,8 +335,9 @@ class DobotMainWindow(QtWidgets.QMainWindow):
     def execute_click_event(self):
         x_list, y_list = self.plan_click_event()
         zstep = float(self.ui.zstep_line.text())
+        tool_length = int(self.ui.tool_length.text())
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
+            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep, tool_length)
         else:
             print("[ERROR] Robot not connected")
         #dType.DisconnectDobot(self.api)
