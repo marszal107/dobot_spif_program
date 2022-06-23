@@ -146,6 +146,6 @@ class Ui_MainWindow(object):
         self.execute_button.setText(_translate("MainWindow", "EXECUTE"))
         self.label_8.setText(_translate("MainWindow", "Diameter [mm]:"))
         self.diameter_line.setText(_translate("MainWindow", "60"))
-        self.tool_length.setText(_translate("MainWindow", "15"))
+        self.tool_length.setText(_translate("MainWindow", "32"))
         self.label_9.setText(_translate("MainWindow", "Tool length [mm]:"))
         self.estop_button.setText(_translate("MainWindow", "E-STOP"))

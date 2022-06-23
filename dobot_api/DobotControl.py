@@ -23,7 +23,7 @@ OFFSET_Y = 1
 BIG_STEP = 10
 MID_STEP = 20
 LOW_STEP = 30
-WS_OFFSET_X = 245
+WS_OFFSET_X = 185
 WS_OFFSET_Y = 4
 
 class DobotControl:
@@ -88,7 +88,7 @@ class DobotControl:
         :return:
         list x, y
         """
-        theta = np.radians(np.linspace(50, 360*5, 10000))
+        theta = np.radians(np.linspace(50, 360*5, int(10000*0.03/step)))
         r = theta**2
         x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
         y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
@@ -110,7 +110,7 @@ class DobotControl:
         y_2_list_offset = []
         for i in range(0,len(x_2_list)-1,1):
             x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y_2_list[i] + WS_OFFSET_Y)
+            y_2_list_offset.append(y_2_list[i])
             i+=i
         x_2_list_offset.reverse()
         y_2_list_offset.reverse()
@@ -259,7 +259,7 @@ class DobotControl:
             else:
                 offset = -50"""
             # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i], -62 + tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
+            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i]*3/4, -45 - tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -322,7 +322,7 @@ class DobotMainWindow(QtWidgets.QMainWindow):
 
     def plan_click_event(self):
         x_list, y_list = None, None
-        diameter = float(self.ui.diameter_line.text())
+        diameter = int(self.ui.diameter_line.text())
         xy_step = float(self.ui.xystep_line.text())
         if self.ui.shapeComboBox.currentText() == "Spiral":
             x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter)
@@ -370,11 +370,12 @@ if __name__ == "__main__":
 
 # if __name__ == '__main__':
 #     dobot = DobotControl()
-#     api, state = dobot.establish_connection(port="COM3", baudrate=115200)
+#     api = dType.load()
+#     state = dobot.establish_connection(port="COM3", baudrate=115200, api=api)
 #
 #     if (state == dType.DobotConnect.DobotConnect_NoError):
-#         x, y, z, rHead = dobot.home_setup(api)
-#         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP)
+#         x, y, z, rHead = dobot.home_setup(api, 200, 200)
+#         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP, diameter=60)
 #         #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
-#         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset)
+#         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset, api, 0.01, 15)
 #     dType.DisconnectDobot(api)
