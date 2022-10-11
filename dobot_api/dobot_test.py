@@ -136,6 +136,69 @@ class DobotControl:
 
         return x_2_list, y_2_list
 
+    def circle(self, diameter):
+        theta = np.linspace( 0 , 2 * np.pi , 150 )
+ 
+        radius = diameter/2
+        x_list = []
+        y_list = []
+        for i in range(5):
+            x_list.append((radius-3*i) * np.cos(theta))
+            y_list.append((radius-3*i) * np.sin(theta))
+        x = radius * np.cos( theta )
+        y = radius * np.sin( theta )
+        
+        x2 = (radius-5) * np.cos( theta )
+        y2 = (radius-5) * np.sin( theta )
+        figure, axes = plt.subplots( 1 )
+        
+        # x_list_poprawione = []
+        # for i in x_list:
+        #     for j in x_list[i]:
+        #         x_list_poprawione.append(x_list[i][j])
+        # y_list_poprawione = []
+        # for i in x_list:
+        #     for j in y_list[i]:
+        #         y_list_poprawione.append(y_list[i][j])
+        # print(x_list)
+        # print(y_list[0])
+        x_list_poprawione = []
+        for i in range(len(x_list)):
+            for j in range(len(x_list[i])):
+                x_list_poprawione.append(x_list[i][j])
+        y_list_poprawione = []
+        for i in range(len(y_list)):
+            for j in range(len(y_list[i])):
+                y_list_poprawione.append(y_list[i][j])
+        # print(x_list_poprawione)
+        # for i in range(len(x_list)):
+        #     axes.plot(x_list[i], y_list[i])
+        axes.plot(x_list_poprawione, y_list_poprawione)
+        # axes.plot( x, y )
+        # axes.plot( x2, y2 )
+        axes.set_aspect( 1 )
+        
+        plt.show()
+    
+    def circle2(self, diameter):
+        theta = np.linspace( 0 , 2 * np.pi , 150 )
+ 
+        radius = diameter/2
+        x = []
+        y = []
+        for i in range(10):
+            x.append(radius-0.5*i * np.cos( theta ))
+            y.append(radius-0.5*i * np.cos( theta ))
+        
+        figure, axes = plt.subplots( 1 )
+        
+        print(x)
+        print(y)
+        axes.plot( x, y )
+        axes.set_aspect( 1 )
+        
+        plt.show()
+
     def triangle(self, step, diameter):
         """
         Returns trajectory points in the form of traingle
@@ -363,20 +426,43 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             pass
 
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    w = DobotMainWindow()
-    w.show()
-    sys.exit(app.exec_())
+# if __name__ == "__main__":
+#     app = QtWidgets.QApplication(sys.argv)
+#     w = DobotMainWindow()
+#     w.show()
+#     sys.exit(app.exec_())
 
 # if __name__ == '__main__':
 #     dobot = DobotControl()
 #     api = dType.load()
 #     state = dobot.establish_connection(port="COM3", baudrate=115200, api=api)
-#
+
 #     if (state == dType.DobotConnect.DobotConnect_NoError):
 #         x, y, z, rHead = dobot.home_setup(api, 200, 200)
 #         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP, diameter=60)
 #         #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
 #         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset, api, 0.01, 15)
 #     dType.DisconnectDobot(api)
+    
+
+
+def circle():
+        theta = np.linspace( 0 , 2 * np.pi , 150 )
+ 
+        radius = 60
+        
+        x = radius * np.cos( theta )
+        y = radius * np.sin( theta )
+        
+        figure, axes = plt.subplots( 1 )
+        
+        print(x)
+        print(y)
+        axes.plot( x, y )
+        axes.set_aspect( 1 )
+        
+        plt.show()
+
+if __name__ == '__main__':
+    dobot = DobotControl()
+    dobot.circle(60)
