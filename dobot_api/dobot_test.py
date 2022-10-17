@@ -14,6 +14,7 @@ import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from main_window import Ui_MainWindow
 
+
 CON_STR = {
     dType.DobotConnect.DobotConnect_NoError:  "DobotConnect_NoError",
     dType.DobotConnect.DobotConnect_NotFound: "DobotConnect_NotFound",
@@ -81,60 +82,6 @@ class DobotControl:
         rHead = pos[3]
         return x, y, z, rHead
 
-    def spiral(self, step, diameter):
-        """
-        Returns trajectory points in the form of spiral
-
-        :return:
-        list x, y
-        """
-        theta = np.radians(np.linspace(50, 360*5, int(10000*0.03/step)))
-        r = theta**2
-        x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
-        y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
-
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x_2, y_2)
-
-        x_2_list = x_2.tolist()
-        y_2_list = y_2.tolist()
-
-        # xy_2_list = []
-        #
-        # for i in range(len(x_2_list)):
-        #     xy_2_list.append([x_2_list[i],
-        #                     y_2_list[i]])
-        #     i+=i
-
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0,len(x_2_list)-1,1):
-            x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y_2_list[i])
-            i+=i
-        x_2_list_offset.reverse()
-        y_2_list_offset.reverse()
-        return x_2_list_offset, y_2_list_offset
-
-    def spiral_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of spiral
-
-        :return:
-        list x, y
-        """
-        theta = np.radians(np.linspace(50, 360 * 5, 10000))
-        r = theta ** 2
-        x_2 = r * np.cos(1 / step * theta) / (diameter / 2)
-        y_2 = r * np.sin(1 / step * theta) / (diameter / 2)
-
-        plt.figure(figsize=[5, 5])
-        plt.plot(x_2, y_2)
-
-        x_2_list = x_2.tolist()
-        y_2_list = y_2.tolist()
-
-        return x_2_list, y_2_list
 
     def circle(self, diameter):
         theta = np.linspace( 0 , 2 * np.pi , 150 )
@@ -142,9 +89,9 @@ class DobotControl:
         radius = diameter/2
         x_list = []
         y_list = []
-        for i in range(5):
-            x_list.append((radius-3*i) * np.cos(theta))
-            y_list.append((radius-3*i) * np.sin(theta))
+        for i in range(20):
+            x_list.append((radius-0.5*i) * np.cos(theta))
+            y_list.append((radius-0.5*i) * np.sin(theta))
         x = radius * np.cos( theta )
         y = radius * np.sin( theta )
         
@@ -199,114 +146,6 @@ class DobotControl:
         
         plt.show()
 
-    def triangle(self, step, diameter):
-        """
-        Returns trajectory points in the form of traingle
-        :param step:
-        :return:
-         """
-
-        x1 = [0, -diameter/2, diameter/2]
-        y1 = [-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2]
-        print(y1)
-        x2 = []
-        y2 = []
-        offset = 0
-        for i in range(0, 20):
-            for j in range(0, len(x1)):
-                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
-                    x1[j] + offset * 2)
-                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
-                    y1[j] + offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x2, y2)
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0, len(x2) - 1, 1):
-            x_2_list_offset.append((x2[i] + WS_OFFSET_X))
-            y_2_list_offset.append(y2[i])
-            i += i
-        return x_2_list_offset, y_2_list_offset
-
-    def triangle_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of traingle
-        :param step:
-        :return:
-         """
-
-        x1 = [0, -diameter/2, diameter/2]
-        y1 = [-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2]
-        print(y1)
-        x2 = []
-        y2 = []
-        offset = 0
-        for i in range(0, 20):
-            for j in range(0, len(x1)):
-                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
-                    x1[j] + offset * 2)
-                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
-                    y1[j] + offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        plt.figure(figsize=[5, 5])
-        plt.plot(x2, y2)
-        return x2, y2
-
-    def square(self, step, diameter):
-        """
-        Returns trajectory points in the form of square
-        :param step:
-        :return:
-        """
-        x1=[-diameter/2, -diameter/2, diameter/2, diameter/2]
-        y1=[-diameter/2, diameter/2, diameter/2, -diameter/2]
-        x2=[]
-        y2=[]
-        offset = 0
-        for i in range(0,20):
-            for j in range(0,len(x1)):
-                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
-                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x2, y2)
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0, len(x2) - 1, 1):
-            x_2_list_offset.append(x2[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y2[i])
-            i += i
-        return x_2_list_offset, y_2_list_offset
-
-    def square_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of square
-        :param step:
-        :return:
-        """
-        x1=[-diameter/2, -diameter/2, diameter/2, diameter/2]
-        y1=[-diameter/2, diameter/2, diameter/2, -diameter/2]
-        x2=[]
-        y2=[]
-        offset = 0
-        for i in range(0,20):
-            for j in range(0,len(x1)):
-                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
-                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        plt.figure(figsize=[5, 5])
-        plt.plot(x2, y2)
-        return x2, y2
-
     def execute_trajectory(self, x_pos, y_pos, api, zstep, tool_length):
         """
         Executes given trajectory via points
@@ -335,134 +174,16 @@ class DobotControl:
         # Stop to Execute Command Queued
         dType.SetQueuedCmdStopExec(api)
 
-    def show_plot(self, function, step, diameter):
-        if function == "Spiral":
-            plt.plot(self.spiral_plot(step, diameter))
-            plt.show()
-        elif function == "Triangle":
-            plt.plot(self.triangle_plot(step, diameter))
-            plt.show()
-        elif function == "Square":
-            plt.plot(self.square_plot(step, diameter))
-            plt.show()
-        else:
-            pass
-
-    def emergency_stop(self, api):
-        #SetQueuedCmdForceStopExec
-        dType.SetQueuedCmdStopExec(api)
-        return None
-
-
-class DobotMainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        self.api = dType.load()
-        self.dobot = DobotControl()
-        self.state = None
-        super(DobotMainWindow, self).__init__(parent=parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.retranslateUi(self)
-        self.ui.connect_button.clicked.connect(self.connect_click_event)
-        self.ui.home_button.clicked.connect(self.home_click_event)
-        self.ui.plan_button.clicked.connect(self.plan_click_event)
-        self.ui.execute_button.clicked.connect(self.execute_click_event)
-        self.ui.estop_button.clicked.connect(self.estop_click_event)
-        self.ui.show_button.clicked.connect(self.show_click_event)
-
-    def home_click_event(self):
-        if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            vel = int(self.ui.velocity_line.text())
-            acc = int(self.ui.acceleration_line.text())
-            self.dobot.home_setup(self.api, vel, acc)
-        else:
-            print("[ERROR] Robot not connected")
-
-    def connect_click_event(self):
-        port = self.ui.port_line.text()
-        baudrate = int(self.ui.baudrate_line.text())
-        self.state = self.dobot.establish_connection(port=port, baudrate=baudrate, api=self.api)
-        return self.state
-
-    def plan_click_event(self):
-        x_list, y_list = None, None
-        diameter = int(self.ui.diameter_line.text())
-        xy_step = float(self.ui.xystep_line.text())
-        if self.ui.shapeComboBox.currentText() == "Spiral":
-            x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter)
-        elif self.ui.shapeComboBox.currentText() == "Triangle":
-            x_list, y_list = self.dobot.triangle(step=xy_step, diameter=diameter)
-        elif self.ui.shapeComboBox.currentText() == "Square":
-            x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter)
-        return x_list, y_list
-
-    def execute_click_event(self):
-        x_list, y_list = self.plan_click_event()
-        zstep = float(self.ui.zstep_line.text())
-        tool_length = int(self.ui.tool_length.text())
-        if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep, tool_length)
-        else:
-            print("[ERROR] Robot not connected")
-        #dType.DisconnectDobot(self.api)
-
-    def estop_click_event(self):
-        if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.emergency_stop(self.api)
-        else:
-            print("[ERROR] Robot not connected")
-
-    def show_click_event(self):
-        xystep = float(self.ui.xystep_line.text())
-        diameter = float(self.ui.diameter_line.text())
-
-        if self.ui.shapeComboBox.currentText() == "Spiral":
-            self.dobot.show_plot("Spiral", xystep, diameter)
-        elif self.ui.shapeComboBox.currentText() == "Triangle":
-            self.dobot.show_plot("Triangle", xystep, diameter)
-        elif self.ui.shapeComboBox.currentText() == "Square":
-            self.dobot.show_plot("Square", xystep, diameter)
-        else:
-            pass
-
-
-# if __name__ == "__main__":
-#     app = QtWidgets.QApplication(sys.argv)
-#     w = DobotMainWindow()
-#     w.show()
-#     sys.exit(app.exec_())
-
-# if __name__ == '__main__':
-#     dobot = DobotControl()
-#     api = dType.load()
-#     state = dobot.establish_connection(port="COM3", baudrate=115200, api=api)
-
-#     if (state == dType.DobotConnect.DobotConnect_NoError):
-#         x, y, z, rHead = dobot.home_setup(api, 200, 200)
-#         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP, diameter=60)
-#         #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
-#         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset, api, 0.01, 15)
-#     dType.DisconnectDobot(api)
-    
-
-
-def circle():
-        theta = np.linspace( 0 , 2 * np.pi , 150 )
- 
-        radius = 60
-        
-        x = radius * np.cos( theta )
-        y = radius * np.sin( theta )
-        
-        figure, axes = plt.subplots( 1 )
-        
-        print(x)
-        print(y)
-        axes.plot( x, y )
-        axes.set_aspect( 1 )
-        
-        plt.show()
 
 if __name__ == '__main__':
     dobot = DobotControl()
-    dobot.circle(60)
+    api = dType.load()
+    state = dobot.establish_connection(port="COM3", baudrate=115200, api=api)
+
+    if (state == dType.DobotConnect.DobotConnect_NoError):
+        x, y, z, rHead = dobot.home_setup(api, 200, 200)
+        x_2_list_offset, y_2_list_offset = dobot.circle(diameter=60)
+        #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
+        dobot.execute_trajectory(x_2_list_offset, y_2_list_offset, api, 0.01, 15)
+    dType.DisconnectDobot(api)
+

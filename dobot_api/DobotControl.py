@@ -13,6 +13,16 @@ import math
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets
 from main_window import Ui_MainWindow
+from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import random
+from matplotlib.backends.qt_compat import QtWidgets
+from matplotlib.backends.backend_qtagg import (
+    FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+
 
 CON_STR = {
     dType.DobotConnect.DobotConnect_NoError:  "DobotConnect_NoError",
@@ -68,10 +78,10 @@ class DobotControl:
         # Async Home
         dType.SetHOMECmd(api, temp=0, isQueued=1)
 
-        moveX = 0;
-        moveY = 0;
-        moveZ = 10;
-        moveFlag = -1
+        # moveX = 0;
+        # moveY = 0;
+        # moveZ = 10;
+        # moveFlag = -1
         time.sleep(20)
         pos = dType.GetPose(api)
         print(pos)
@@ -81,60 +91,87 @@ class DobotControl:
         rHead = pos[3]
         return x, y, z, rHead
 
+    # def spiral(self, step, diameter):
+    #     """
+    #     Returns trajectory points in the form of spiral
+
+    #     :return:
+    #     list x, y
+    #     """
+    #     theta = np.radians(np.linspace(50, 360*5, int(10000*0.03/step)))
+    #     r = theta**2
+    #     x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
+    #     y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
+
+    #     # plt.figure(figsize=[5, 5])
+    #     # plt.plot(x_2, y_2)
+
+    #     x_2_list = x_2.tolist()
+    #     y_2_list = y_2.tolist()
+
+    #     # xy_2_list = []
+    #     #
+    #     # for i in range(len(x_2_list)):
+    #     #     xy_2_list.append([x_2_list[i],
+    #     #                     y_2_list[i]])
+    #     #     i+=i
+
+    #     x_2_list_offset = []
+    #     y_2_list_offset = []
+    #     for i in range(0,len(x_2_list)-1,1):
+    #         x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
+    #         y_2_list_offset.append(y_2_list[i])
+    #         i+=i
+    #     x_2_list_offset.reverse()
+    #     y_2_list_offset.reverse()
+    #     return x_2_list_offset, y_2_list_offset
+
+    # def spiral_plot(self, step, diameter):
+    #     """
+    #     Returns trajectory points in the form of spiral
+
+    #     :return:
+    #     list x, y
+    #     """
+    #     theta = np.radians(np.linspace(50, 360 * 5, 10000))
+    #     r = theta ** 2
+    #     x_2 = r * np.cos(1 / step * theta) / (diameter / 2)
+    #     y_2 = r * np.sin(1 / step * theta) / (diameter / 2)
+
+    #     plt.figure(figsize=[5, 5])
+    #     plt.plot(x_2, y_2)
+
+    #     x_2_list = x_2.tolist()
+    #     y_2_list = y_2.tolist()
+
+    #     return x_2_list, y_2_list
+
     def spiral(self, step, diameter):
-        """
-        Returns trajectory points in the form of spiral
+        theta = np.linspace( 0 , 2 * np.pi , 500 )
+ 
+        radius = diameter/2
+        x_list = []
+        y_list = []
+        for i in range(150):
+            x_list.append((radius-step*i) * np.cos(theta))
+            y_list.append((radius-step*i) * np.sin(theta))
 
-        :return:
-        list x, y
-        """
-        theta = np.radians(np.linspace(50, 360*5, int(10000*0.03/step)))
-        r = theta**2
-        x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
-        y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
+        # figure, axes = plt.subplots( 1 )
+        
+        # x_list_poprawione = []
+        # for i in range(len(x_list)):
+        #     for j in range(len(x_list[i])):
+        #         x_list_poprawione.append(x_list[i][j])
+        # y_list_poprawione = []
+        # for i in range(len(y_list)):
+        #     for j in range(len(y_list[i])):
+        #         y_list_poprawione.append(y_list[i][j])
+        # axes.plot(x_list_poprawione, y_list_poprawione)
+        # axes.set_aspect(1)
+        
+        # plt.show()
 
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x_2, y_2)
-
-        x_2_list = x_2.tolist()
-        y_2_list = y_2.tolist()
-
-        # xy_2_list = []
-        #
-        # for i in range(len(x_2_list)):
-        #     xy_2_list.append([x_2_list[i],
-        #                     y_2_list[i]])
-        #     i+=i
-
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0,len(x_2_list)-1,1):
-            x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y_2_list[i])
-            i+=i
-        x_2_list_offset.reverse()
-        y_2_list_offset.reverse()
-        return x_2_list_offset, y_2_list_offset
-
-    def spiral_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of spiral
-
-        :return:
-        list x, y
-        """
-        theta = np.radians(np.linspace(50, 360 * 5, 10000))
-        r = theta ** 2
-        x_2 = r * np.cos(1 / step * theta) / (diameter / 2)
-        y_2 = r * np.sin(1 / step * theta) / (diameter / 2)
-
-        plt.figure(figsize=[5, 5])
-        plt.plot(x_2, y_2)
-
-        x_2_list = x_2.tolist()
-        y_2_list = y_2.tolist()
-
-        return x_2_list, y_2_list
+        return x_list, y_list
 
     def triangle(self, step, diameter):
         """
@@ -251,16 +288,18 @@ class DobotControl:
         :param y_pos:
         :return:
         """
+        pos = dType.GetPose(api)
+        print(pos)
         rHead = 0
-        dType.SetCPCmd(api, 1, -20 + OFFSET_X, 0, -57 - tool_length, rHead, isQueued=1)[0]
+        # dType.SetCPCmd(api, 1, -20 + OFFSET_X, 0, -57 - tool_length, rHead, isQueued=1)[0]
         # Async PTP Motion
-        for i in range(0, len(x_pos), 1):
-            """if i % 2 == 0:
-                offset = 50
-            else:
-                offset = -50"""
-            # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-            lastIndex = dType.SetCPCmd(api, 1, x_pos[i] - 200 + OFFSET_X, y_pos[i]*3/4, -57 - tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
+        for i in range(len(x_pos)):
+            for j in range(len(x_pos[i])):
+                # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
+                # lastIndex = dType.SetCPCmd(api, 1, x_pos[i][j] - 200 + OFFSET_X + WS_OFFSET_X, y_pos[i][j], -57 - tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
+                lastIndex = dType.SetCPCmd(api, 1, - x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1], pos[2] - zstep * (i - 1), rHead, isQueued=1)[0]
+                if j==250:
+                    print(x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1])
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -286,7 +325,6 @@ class DobotControl:
             pass
 
     def emergency_stop(self, api):
-        #SetQueuedCmdForceStopExec
         dType.SetQueuedCmdStopExec(api)
         return None
 
@@ -307,6 +345,40 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.estop_button.clicked.connect(self.estop_click_event)
         self.ui.show_button.clicked.connect(self.show_click_event)
 
+
+        # self._main = QtWidgets.QWidget()
+        # self.setCentralWidget(self._main)
+        # layout = QtWidgets.QVBoxLayout(self._main)
+
+        # static_canvas = FigureCanvas(Figure(figsize=(5, 3)))
+        # # Ideally one would use self.addToolBar here, but it is slightly
+        # # incompatible between PyQt6 and other bindings, so we just add the
+        # # toolbar as a plain widget instead.
+        # layout.addWidget(NavigationToolbar(static_canvas, self))
+        # layout.addWidget(static_canvas)
+
+        # # dynamic_canvas = FigureCanvas(Figure(figsize=(5, 3)))
+        # # layout.addWidget(dynamic_canvas)
+        # # layout.addWidget(NavigationToolbar(dynamic_canvas, self))
+
+        # self._static_ax = static_canvas.figure.subplots()
+        # t = np.linspace(0, 10, 501)
+        # self._static_ax.plot(t, np.tan(t), ".")
+
+        # # self._dynamic_ax = dynamic_canvas.figure.subplots()
+        # # t = np.linspace(0, 10, 101)
+        # # # Set up a Line2D.
+        # # self._line, = self._dynamic_ax.plot(t, np.sin(t + time.time()))
+        # # self._timer = dynamic_canvas.new_timer(50)
+        # # # self._timer.add_callback(self._update_canvas)
+        # # self._timer.start()
+
+    def connect_click_event(self):
+        port = self.ui.port_line.text()
+        baudrate = int(self.ui.baudrate_line.text())
+        self.state = self.dobot.establish_connection(port=port, baudrate=baudrate, api=self.api)
+        return self.state
+
     def home_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
             vel = int(self.ui.velocity_line.text())
@@ -314,12 +386,6 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             self.dobot.home_setup(self.api, vel, acc)
         else:
             print("[ERROR] Robot not connected")
-
-    def connect_click_event(self):
-        port = self.ui.port_line.text()
-        baudrate = int(self.ui.baudrate_line.text())
-        self.state = self.dobot.establish_connection(port=port, baudrate=baudrate, api=self.api)
-        return self.state
 
     def plan_click_event(self):
         x_list, y_list = None, None
@@ -361,6 +427,7 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             self.dobot.show_plot("Square", xystep, diameter)
         else:
             pass
+
 
 
 if __name__ == "__main__":
