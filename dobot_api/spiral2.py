@@ -59,5 +59,7 @@ def spiral(step, diameter, iterations):
         # y.append(y_2_rev[100*i-100:100*i+1])
     # return x, y
     plt.show()
+    print(x_2_rev)
+    print(y_2_rev)
 
 spiral(0.1, 60, 100)

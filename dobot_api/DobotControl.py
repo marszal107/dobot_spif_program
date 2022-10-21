@@ -91,195 +91,75 @@ class DobotControl:
         rHead = pos[3]
         return x, y, z, rHead
 
-    # def spiral(self, step, diameter):
-    #     """
-    #     Returns trajectory points in the form of spiral
+    def spiral(self, step, diameter, iterations):
+        """
+        Returns trajectory points in the form of spiral
 
-    #     :return:
-    #     list x, y
-    #     """
-    #     theta = np.radians(np.linspace(50, 360*5, int(10000*0.03/step)))
-    #     r = theta**2
-    #     x_2 = r*np.cos(1/step*theta)*(diameter/2)/900
-    #     y_2 = r*np.sin(1/step*theta)*(diameter/2)/900
+        :return:
+        list x, y
+        """
 
-    #     # plt.figure(figsize=[5, 5])
-    #     # plt.plot(x_2, y_2)
+        points_count = 20000 
+        points_factor = points_count/10000
+        dia_factor = diameter/60
+        step_div = 0.58 * dia_factor / step 
 
-    #     x_2_list = x_2.tolist()
-    #     y_2_list = y_2.tolist()
+        theta = np.radians(np.linspace(0, 360*100*step_div, int(points_count*step_div*points_factor)))
+        r = (diameter/10)/80000*theta**2/(step_div*step_div)
 
-    #     # xy_2_list = []
-    #     #
-    #     # for i in range(len(x_2_list)):
-    #     #     xy_2_list.append([x_2_list[i],
-    #     #                     y_2_list[i]])
-    #     #     i+=i
-
-    #     x_2_list_offset = []
-    #     y_2_list_offset = []
-    #     for i in range(0,len(x_2_list)-1,1):
-    #         x_2_list_offset.append(x_2_list[i] + WS_OFFSET_X)
-    #         y_2_list_offset.append(y_2_list[i])
-    #         i+=i
-    #     x_2_list_offset.reverse()
-    #     y_2_list_offset.reverse()
-    #     return x_2_list_offset, y_2_list_offset
-
-    # def spiral_plot(self, step, diameter):
-    #     """
-    #     Returns trajectory points in the form of spiral
-
-    #     :return:
-    #     list x, y
-    #     """
-    #     theta = np.radians(np.linspace(50, 360 * 5, 10000))
-    #     r = theta ** 2
-    #     x_2 = r * np.cos(1 / step * theta) / (diameter / 2)
-    #     y_2 = r * np.sin(1 / step * theta) / (diameter / 2)
-
-    #     plt.figure(figsize=[5, 5])
-    #     plt.plot(x_2, y_2)
-
-    #     x_2_list = x_2.tolist()
-    #     y_2_list = y_2.tolist()
-
-    #     return x_2_list, y_2_list
-
-    def spiral(self, step, diameter):
-        theta = np.linspace( 0 , 2 * np.pi , 500 )
- 
-        radius = diameter/2
-        x_list = []
-        y_list = []
-        for i in range(150):
-            x_list.append((radius-step*i) * np.cos(theta))
-            y_list.append((radius-step*i) * np.sin(theta))
-
-        # figure, axes = plt.subplots( 1 )
+        x_2 = r*np.cos(theta)
+        y_2 = r*np.sin(theta)
+        x_2_rev = np.flip(x_2)
+        y_2_rev = np.flip(y_2)
+        x = []
+        y = []
         
-        # x_list_poprawione = []
-        # for i in range(len(x_list)):
-        #     for j in range(len(x_list[i])):
-        #         x_list_poprawione.append(x_list[i][j])
-        # y_list_poprawione = []
-        # for i in range(len(y_list)):
-        #     for j in range(len(y_list[i])):
-        #         y_list_poprawione.append(y_list[i][j])
-        # axes.plot(x_list_poprawione, y_list_poprawione)
-        # axes.set_aspect(1)
-        
-        # plt.show()
+        iter_point_count = int(100*points_factor**2)
+        for i in range(1, iterations+1):
+            x.append(x_2_rev[iter_point_count*i-iter_point_count:iter_point_count*i+1])
+            y.append(y_2_rev[iter_point_count*i-iter_point_count:iter_point_count*i+1])
+        return x, y
 
-        return x_list, y_list
-
-    def triangle(self, step, diameter):
+    def triangle(self, step, diameter, iterations):
         """
         Returns trajectory points in the form of traingle
         :param step:
         :return:
          """
 
-        x1 = [0, -diameter/2, diameter/2]
-        y1 = [-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2]
-        print(y1)
-        x2 = []
-        y2 = []
+        x1 = np.array([0, -diameter/2, diameter/2, 0])
+        y1 = np.array([-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2, -math.sqrt((diameter/2)**2 - (diameter/4)**2)+2*step])
+        # TODO: Switch to numpy
+        x = [[] for i in range(iterations)]
+        y = [[] for i in range(iterations)]
         offset = 0
-        for i in range(0, 20):
+        for i in range(0, iterations):
             for j in range(0, len(x1)):
-                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
+                x[i].append(x1[j]) if x1[j] == 0 else x[i].append(x1[j] - offset * 2) if x1[j] > 0 else x[i].append(
                     x1[j] + offset * 2)
-                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
+                y[i].append(y1[j] + offset * 2) if x1[j] == 0 else y[i].append(y1[j] - offset) if y1[j] > 0 else y[i].append(
                     y1[j] + offset)
             offset += step
-        #print(x2)
-        #print(y2)
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x2, y2)
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0, len(x2) - 1, 1):
-            x_2_list_offset.append((x2[i] + WS_OFFSET_X))
-            y_2_list_offset.append(y2[i])
-            i += i
-        return x_2_list_offset, y_2_list_offset
+        return x, y
 
-    def triangle_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of traingle
-        :param step:
-        :return:
-         """
-
-        x1 = [0, -diameter/2, diameter/2]
-        y1 = [-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2]
-        print(y1)
-        x2 = []
-        y2 = []
-        offset = 0
-        for i in range(0, 20):
-            for j in range(0, len(x1)):
-                x2.append(x1[j]) if x1[j] == 0 else x2.append(x1[j] - offset * 2) if x1[j] > 0 else x2.append(
-                    x1[j] + offset * 2)
-                y2.append(y1[j] + offset * 2) if x1[j] == 0 else y2.append(y1[j] - offset) if y1[j] > 0 else y2.append(
-                    y1[j] + offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        plt.figure(figsize=[5, 5])
-        plt.plot(x2, y2)
-        return x2, y2
-
-    def square(self, step, diameter):
+    def square(self, step, diameter, iterations):
         """
         Returns trajectory points in the form of square
         :param step:
         :return:
         """
-        x1=[-diameter/2, -diameter/2, diameter/2, diameter/2]
-        y1=[-diameter/2, diameter/2, diameter/2, -diameter/2]
-        x2=[]
-        y2=[]
+        x1 = np.array([-diameter/2, -diameter/2, diameter/2, diameter/2, -diameter/2+step])
+        y1 = np.array([-diameter/2, diameter/2, diameter/2, -diameter/2+step, -diameter/2+step])
+        # TODO: Switch to numpy
+        x = [[] for i in range(iterations)]
+        y = [[] for i in range(iterations)]
         offset = 0
-        for i in range(0,20):
+        for i in range(0,iterations):
             for j in range(0,len(x1)):
-                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
-                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
+                x[i].append(x1[j]) if x1[j]==0 else x[i].append(x1[j]-offset) if x1[j]>0 else x[i].append(x1[j]+offset)
+                y[i].append(y1[j]+offset) if x1[j]==0 else y[i].append(y1[j]-offset) if y1[j]>0 else y[i].append(y1[j]+offset)
             offset += step
-        #print(x2)
-        #print(y2)
-        # plt.figure(figsize=[5, 5])
-        # plt.plot(x2, y2)
-        x_2_list_offset = []
-        y_2_list_offset = []
-        for i in range(0, len(x2) - 1, 1):
-            x_2_list_offset.append(x2[i] + WS_OFFSET_X)
-            y_2_list_offset.append(y2[i])
-            i += i
-        return x_2_list_offset, y_2_list_offset
-
-    def square_plot(self, step, diameter):
-        """
-        Returns trajectory points in the form of square
-        :param step:
-        :return:
-        """
-        x1=[-diameter/2, -diameter/2, diameter/2, diameter/2]
-        y1=[-diameter/2, diameter/2, diameter/2, -diameter/2]
-        x2=[]
-        y2=[]
-        offset = 0
-        for i in range(0,20):
-            for j in range(0,len(x1)):
-                x2.append(x1[j]) if x1[j]==0 else x2.append(x1[j]-offset) if x1[j]>0 else x2.append(x1[j]+offset)
-                y2.append(y1[j]+offset) if x1[j]==0 else y2.append(y1[j]-offset) if y1[j]>0 else y2.append(y1[j]+offset)
-            offset += step
-        #print(x2)
-        #print(y2)
-        plt.figure(figsize=[5, 5])
-        plt.plot(x2, y2)
-        return x2, y2
+        return x, y
 
     def execute_trajectory(self, x_pos, y_pos, api, zstep, tool_length):
         """
@@ -292,7 +172,7 @@ class DobotControl:
         print(pos)
         rHead = 0
         # dType.SetCPCmd(api, 1, -20 + OFFSET_X, 0, -57 - tool_length, rHead, isQueued=1)[0]
-        # Async PTP Motion
+        # Async CPC Motion
         for i in range(len(x_pos)):
             for j in range(len(x_pos[i])):
                 # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
@@ -311,18 +191,18 @@ class DobotControl:
         # Stop to Execute Command Queued
         dType.SetQueuedCmdStopExec(api)
 
-    def show_plot(self, function, step, diameter):
+    def show_plot(self, function, step, diameter, iterations):
         if function == "Spiral":
-            plt.plot(self.spiral_plot(step, diameter))
-            plt.show()
+            x, y = self.spiral(step, diameter, iterations)
         elif function == "Triangle":
-            plt.plot(self.triangle_plot(step, diameter))
-            plt.show()
+            x, y = self.triangle(step, diameter, iterations)
         elif function == "Square":
-            plt.plot(self.square_plot(step, diameter))
-            plt.show()
+            x, y = self.square(step, diameter, iterations)
         else:
             pass
+        for i in range(iterations):
+            plt.plot(x[i], y[i])
+        plt.show()
 
     def emergency_stop(self, api):
         dType.SetQueuedCmdStopExec(api)
@@ -345,34 +225,6 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.estop_button.clicked.connect(self.estop_click_event)
         self.ui.show_button.clicked.connect(self.show_click_event)
 
-
-        # self._main = QtWidgets.QWidget()
-        # self.setCentralWidget(self._main)
-        # layout = QtWidgets.QVBoxLayout(self._main)
-
-        # static_canvas = FigureCanvas(Figure(figsize=(5, 3)))
-        # # Ideally one would use self.addToolBar here, but it is slightly
-        # # incompatible between PyQt6 and other bindings, so we just add the
-        # # toolbar as a plain widget instead.
-        # layout.addWidget(NavigationToolbar(static_canvas, self))
-        # layout.addWidget(static_canvas)
-
-        # # dynamic_canvas = FigureCanvas(Figure(figsize=(5, 3)))
-        # # layout.addWidget(dynamic_canvas)
-        # # layout.addWidget(NavigationToolbar(dynamic_canvas, self))
-
-        # self._static_ax = static_canvas.figure.subplots()
-        # t = np.linspace(0, 10, 501)
-        # self._static_ax.plot(t, np.tan(t), ".")
-
-        # # self._dynamic_ax = dynamic_canvas.figure.subplots()
-        # # t = np.linspace(0, 10, 101)
-        # # # Set up a Line2D.
-        # # self._line, = self._dynamic_ax.plot(t, np.sin(t + time.time()))
-        # # self._timer = dynamic_canvas.new_timer(50)
-        # # # self._timer.add_callback(self._update_canvas)
-        # # self._timer.start()
-
     def connect_click_event(self):
         port = self.ui.port_line.text()
         baudrate = int(self.ui.baudrate_line.text())
@@ -391,12 +243,13 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         x_list, y_list = None, None
         diameter = int(self.ui.diameter_line.text())
         xy_step = float(self.ui.xystep_line.text())
+        iterations = int(self.ui.iterations_line.text())
         if self.ui.shapeComboBox.currentText() == "Spiral":
-            x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter)
+            x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter, iterations=iterations)
         elif self.ui.shapeComboBox.currentText() == "Triangle":
-            x_list, y_list = self.dobot.triangle(step=xy_step, diameter=diameter)
+            x_list, y_list = self.dobot.triangle(step=xy_step, diameter=diameter, iterations=iterations)
         elif self.ui.shapeComboBox.currentText() == "Square":
-            x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter)
+            x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter, iterations=iterations)
         return x_list, y_list
 
     def execute_click_event(self):
@@ -418,13 +271,14 @@ class DobotMainWindow(QtWidgets.QMainWindow):
     def show_click_event(self):
         xystep = float(self.ui.xystep_line.text())
         diameter = float(self.ui.diameter_line.text())
+        iterations = int(self.ui.iterations_line.text())
 
         if self.ui.shapeComboBox.currentText() == "Spiral":
-            self.dobot.show_plot("Spiral", xystep, diameter)
+            self.dobot.show_plot("Spiral", xystep, diameter, iterations)
         elif self.ui.shapeComboBox.currentText() == "Triangle":
-            self.dobot.show_plot("Triangle", xystep, diameter)
+            self.dobot.show_plot("Triangle", xystep, diameter, iterations)
         elif self.ui.shapeComboBox.currentText() == "Square":
-            self.dobot.show_plot("Square", xystep, diameter)
+            self.dobot.show_plot("Square", xystep, diameter, iterations)
         else:
             pass
 
