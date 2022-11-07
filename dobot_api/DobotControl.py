@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import threading
 import DobotDllType as dType
@@ -17,24 +18,14 @@ from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import random
-from matplotlib.backends.qt_compat import QtWidgets
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-from matplotlib.figure import Figure
 
+log = logging.getLogger(__name__)
 
 CON_STR = {
     dType.DobotConnect.DobotConnect_NoError:  "DobotConnect_NoError",
     dType.DobotConnect.DobotConnect_NotFound: "DobotConnect_NotFound",
     dType.DobotConnect.DobotConnect_Occupied: "DobotConnect_Occupied"}
-OFFSET_X = 177
-OFFSET_Y = 1
-BIG_STEP = 10
-MID_STEP = 20
-LOW_STEP = 30
-WS_OFFSET_X = 185
-WS_OFFSET_Y = 4
+
 
 class DobotControl:
     # def __init__(self):
@@ -82,14 +73,14 @@ class DobotControl:
         # moveY = 0;
         # moveZ = 10;
         # moveFlag = -1
-        time.sleep(20)
-        pos = dType.GetPose(api)
-        print(pos)
-        x = pos[0]
-        y = pos[1]
-        z = pos[2]
-        rHead = pos[3]
-        return x, y, z, rHead
+        # time.sleep(20)
+        # pos = dType.GetPose(api)
+        # # print(pos)
+        # x = pos[0]
+        # y = pos[1]
+        # z = pos[2]
+        # rHead = pos[3]
+        # return x, y, z, rHead
 
     def spiral(self, step, diameter, iterations):
         """
@@ -161,7 +152,7 @@ class DobotControl:
             offset += step
         return x, y
 
-    def execute_trajectory(self, x_pos, y_pos, api, zstep, tool_length):
+    def execute_trajectory(self, x_pos, y_pos, api, zstep):
         """
         Executes given trajectory via points
         :param x_pos:
@@ -169,17 +160,22 @@ class DobotControl:
         :return:
         """
         pos = dType.GetPose(api)
-        print(pos)
+        print(f"Current position of robot: {pos}")
         rHead = 0
         # dType.SetCPCmd(api, 1, -20 + OFFSET_X, 0, -57 - tool_length, rHead, isQueued=1)[0]
         # Async CPC Motion
         for i in range(len(x_pos)):
+            print(f"Current iteration: {i+1}")
             for j in range(len(x_pos[i])):
                 # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
                 # lastIndex = dType.SetCPCmd(api, 1, x_pos[i][j] - 200 + OFFSET_X + WS_OFFSET_X, y_pos[i][j], -57 - tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
-                lastIndex = dType.SetCPCmd(api, 1, - x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1], pos[2] - zstep * (i - 1), rHead, isQueued=1)[0]
-                if j==250:
-                    print(x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1])
+                try:
+                    lastIndex = dType.SetCPCmd(api, 1, + x_pos[i][j+1] + pos[0], y_pos[i][j+1]*3/4 + pos[1], pos[2] - zstep * (i - 1), rHead, isQueued=1)[0]
+                except IndexError:
+                    pass
+                # if j==250:
+                #     print(x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1])
+                # print(f"Current position: {j}")
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -191,7 +187,10 @@ class DobotControl:
         # Stop to Execute Command Queued
         dType.SetQueuedCmdStopExec(api)
 
-    def show_plot(self, function, step, diameter, iterations):
+    def show_plot(self, function, step, diameter, iterations, z_step):
+        ax = plt.figure().add_subplot(projection='3d')
+        N = 5  
+        ax.set_box_aspect((N, N, 1))  
         if function == "Spiral":
             x, y = self.spiral(step, diameter, iterations)
         elif function == "Triangle":
@@ -201,7 +200,7 @@ class DobotControl:
         else:
             pass
         for i in range(iterations):
-            plt.plot(x[i], y[i])
+            ax.plot(x[i], y[i], -z_step*i)
         plt.show()
 
     def emergency_stop(self, api):
@@ -211,9 +210,6 @@ class DobotControl:
 
 class DobotMainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        self.api = dType.load()
-        self.dobot = DobotControl()
-        self.state = None
         super(DobotMainWindow, self).__init__(parent=parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -224,6 +220,9 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.ui.execute_button.clicked.connect(self.execute_click_event)
         self.ui.estop_button.clicked.connect(self.estop_click_event)
         self.ui.show_button.clicked.connect(self.show_click_event)
+        self.api = dType.load()
+        self.dobot = DobotControl()
+        self.state = None
 
     def connect_click_event(self):
         port = self.ui.port_line.text()
@@ -237,7 +236,7 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             acc = int(self.ui.acceleration_line.text())
             self.dobot.home_setup(self.api, vel, acc)
         else:
-            print("[ERROR] Robot not connected")
+            log.fatal("[ERROR] Robot not connected")
 
     def plan_click_event(self):
         x_list, y_list = None, None
@@ -255,9 +254,8 @@ class DobotMainWindow(QtWidgets.QMainWindow):
     def execute_click_event(self):
         x_list, y_list = self.plan_click_event()
         zstep = float(self.ui.zstep_line.text())
-        tool_length = int(self.ui.tool_length.text())
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep, tool_length)
+            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
         else:
             print("[ERROR] Robot not connected")
         #dType.DisconnectDobot(self.api)
@@ -265,6 +263,12 @@ class DobotMainWindow(QtWidgets.QMainWindow):
     def estop_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
             self.dobot.emergency_stop(self.api)
+            print(f"Execution finished with E-STOP button")
+            print(f"Used configuration:")
+            print(f"- X/Y step - {self.ui.xystep_line.text()}")
+            print(f"- Z step - {self.ui.zstep_line.text()}")
+            print(f"- diameter - {self.ui.diameter_line.text()}")
+            print(f"- iterations - {self.ui.iterations_line.text()}")
         else:
             print("[ERROR] Robot not connected")
 
@@ -272,13 +276,14 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         xystep = float(self.ui.xystep_line.text())
         diameter = float(self.ui.diameter_line.text())
         iterations = int(self.ui.iterations_line.text())
+        z_step = float(self.ui.zstep_line.text())
 
         if self.ui.shapeComboBox.currentText() == "Spiral":
-            self.dobot.show_plot("Spiral", xystep, diameter, iterations)
+            self.dobot.show_plot("Spiral", xystep, diameter, iterations, z_step)
         elif self.ui.shapeComboBox.currentText() == "Triangle":
-            self.dobot.show_plot("Triangle", xystep, diameter, iterations)
+            self.dobot.show_plot("Triangle", xystep, diameter, iterations, z_step)
         elif self.ui.shapeComboBox.currentText() == "Square":
-            self.dobot.show_plot("Square", xystep, diameter, iterations)
+            self.dobot.show_plot("Square", xystep, diameter, iterations, z_step)
         else:
             pass
 
