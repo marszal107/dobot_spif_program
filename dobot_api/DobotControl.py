@@ -117,21 +117,19 @@ class DobotControl:
         :param step:
         :return:
          """
-
-        x1 = np.array([0, -diameter/2, diameter/2, 0])
-        y1 = np.array([-math.sqrt((diameter/2)**2 - (diameter/4)**2), diameter/2, diameter/2, -math.sqrt((diameter/2)**2 - (diameter/4)**2)+2*step])
+        h = diameter*3/4
+        b = h/math.sqrt(3)
+        x1 = np.array([0, -b, b, 0])
+        y1 = np.array([h*2/3, -1/3*h, -1/3*h, h*2/3])
+        # y1 = np.array([diameter*3/2*2, diameter/2, diameter/2, diameter*3/2*2])
         # TODO: Switch to numpy
         x = [[] for i in range(iterations)]
         y = [[] for i in range(iterations)]
-        offset = 0
-        for i in range(0, iterations):
-            for j in range(0, len(x1)):
-                x[i].append(x1[j]) if x1[j] == 0 else x[i].append(x1[j] - offset * 2) if x1[j] > 0 else x[i].append(
-                    x1[j] + offset * 2)
-                y[i].append(y1[j] + offset * 2) if x1[j] == 0 else y[i].append(y1[j] - offset) if y1[j] > 0 else y[i].append(
-                    y1[j] + offset)
-            offset += step
-        return x, y
+        for i in range(iterations):
+            for id, val in enumerate(x1):
+                x[i].append(val - step*i) if val > 0  else x[i].append(val + step*i) if val < 0 else x[i].append(val)
+                y[i].append(y1[id] - step*i) if y1[id] > 0 else y[i].append(y1[id] + step/math.sqrt(2)*i) if y1[id] < 0 else y[i].append(y1[id])
+        return y, x
 
     def square(self, step, diameter, iterations):
         """
@@ -139,8 +137,9 @@ class DobotControl:
         :param step:
         :return:
         """
-        x1 = np.array([-diameter/2, -diameter/2, diameter/2, diameter/2, -diameter/2+step])
-        y1 = np.array([-diameter/2, diameter/2, diameter/2, -diameter/2+step, -diameter/2+step])
+        a = diameter/2*math.sqrt(2)/2
+        x1 = np.array([-a, -a, a, a, -a+step])
+        y1 = np.array([-a, a, a, -a+step, -a+step])
         # TODO: Switch to numpy
         x = [[] for i in range(iterations)]
         y = [[] for i in range(iterations)]
@@ -188,8 +187,8 @@ class DobotControl:
         dType.SetQueuedCmdStopExec(api)
 
     def show_plot(self, function, step, diameter, iterations, z_step):
-        ax = plt.figure().add_subplot(projection='3d')
-        N = 5  
+        ax = plt.figure(figsize=(8,8), num="Planned Trajectory").add_subplot(projection='3d', )
+        N = 5*step/z_step  
         ax.set_box_aspect((N, N, 1))  
         if function == "Spiral":
             x, y = self.spiral(step, diameter, iterations)
@@ -258,7 +257,6 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
         else:
             print("[ERROR] Robot not connected")
-        #dType.DisconnectDobot(self.api)
 
     def estop_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
