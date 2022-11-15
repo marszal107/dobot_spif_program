@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\main_window.ui'
+# Form implementation generated from reading ui file 'main_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.7
 #
@@ -15,18 +15,18 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(870, 480)
+        MainWindow.resize(310, 480)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMinimumSize(QtCore.QSize(870, 480))
-        MainWindow.setMaximumSize(QtCore.QSize(870, 480))
+        MainWindow.setMinimumSize(QtCore.QSize(310, 480))
+        MainWindow.setMaximumSize(QtCore.QSize(310, 480))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.setupGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.setupGroupBox.setGeometry(QtCore.QRect(560, 110, 291, 81))
+        self.setupGroupBox.setGeometry(QtCore.QRect(10, 100, 291, 81))
         self.setupGroupBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.setupGroupBox.setObjectName("setupGroupBox")
         self.label_3 = QtWidgets.QLabel(self.setupGroupBox)
@@ -45,7 +45,7 @@ class Ui_MainWindow(object):
         self.home_button.setGeometry(QtCore.QRect(210, 30, 71, 31))
         self.home_button.setObjectName("home_button")
         self.connectionGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.connectionGroupBox.setGeometry(QtCore.QRect(560, 20, 291, 81))
+        self.connectionGroupBox.setGeometry(QtCore.QRect(10, 10, 291, 81))
         self.connectionGroupBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.connectionGroupBox.setObjectName("connectionGroupBox")
         self.port_line = QtWidgets.QLineEdit(self.connectionGroupBox)
@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         self.connect_button.setGeometry(QtCore.QRect(210, 30, 71, 31))
         self.connect_button.setObjectName("connect_button")
         self.trajectoryGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.trajectoryGroupBox.setGeometry(QtCore.QRect(560, 200, 291, 191))
+        self.trajectoryGroupBox.setGeometry(QtCore.QRect(10, 190, 291, 191))
         self.trajectoryGroupBox.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.trajectoryGroupBox.setObjectName("trajectoryGroupBox")
         self.shapeComboBox = QtWidgets.QComboBox(self.trajectoryGroupBox)
@@ -111,7 +111,7 @@ class Ui_MainWindow(object):
         self.iterations_line.setGeometry(QtCore.QRect(120, 140, 71, 20))
         self.iterations_line.setObjectName("iterations_line")
         self.estop_button = QtWidgets.QPushButton(self.centralwidget)
-        self.estop_button.setGeometry(QtCore.QRect(750, 400, 101, 41))
+        self.estop_button.setGeometry(QtCore.QRect(200, 390, 101, 41))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.estop_button.setFont(font)

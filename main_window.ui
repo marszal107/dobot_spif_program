@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>870</width>
+    <width>310</width>
     <height>480</height>
    </rect>
   </property>
@@ -21,13 +21,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>870</width>
+    <width>310</width>
     <height>480</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>870</width>
+    <width>310</width>
     <height>480</height>
    </size>
   </property>
@@ -38,8 +38,8 @@
    <widget class="QGroupBox" name="setupGroupBox">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>110</y>
+      <x>10</x>
+      <y>100</y>
       <width>291</width>
       <height>81</height>
      </rect>
@@ -119,8 +119,8 @@
    <widget class="QGroupBox" name="connectionGroupBox">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>20</y>
+      <x>10</x>
+      <y>10</y>
       <width>291</width>
       <height>81</height>
      </rect>
@@ -200,8 +200,8 @@
    <widget class="QGroupBox" name="trajectoryGroupBox">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>200</y>
+      <x>10</x>
+      <y>190</y>
       <width>291</width>
       <height>191</height>
      </rect>
@@ -400,8 +400,8 @@
    <widget class="QPushButton" name="estop_button">
     <property name="geometry">
      <rect>
-      <x>750</x>
-      <y>400</y>
+      <x>200</x>
+      <y>390</y>
       <width>101</width>
       <height>41</height>
      </rect>

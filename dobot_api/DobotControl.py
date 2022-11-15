@@ -28,10 +28,6 @@ CON_STR = {
 
 
 class DobotControl:
-    # def __init__(self):
-    #     # Load Dll and get the CDLL object
-    #     self.api = dType.load()
-
     def establish_connection(self, port, baudrate, api):
         """
         Establishes connection with Dobot Magician
@@ -42,8 +38,6 @@ class DobotControl:
         api
         state
         """
-        # # Load Dll and get the CDLL object
-        #api = dType.load()
 
         # Connect Dobot
         state = dType.ConnectDobot(api, port, baudrate)[0]
@@ -68,19 +62,6 @@ class DobotControl:
 
         # Async Home
         dType.SetHOMECmd(api, temp=0, isQueued=1)
-
-        # moveX = 0;
-        # moveY = 0;
-        # moveZ = 10;
-        # moveFlag = -1
-        # time.sleep(20)
-        # pos = dType.GetPose(api)
-        # # print(pos)
-        # x = pos[0]
-        # y = pos[1]
-        # z = pos[2]
-        # rHead = pos[3]
-        # return x, y, z, rHead
 
     def spiral(self, step, diameter, iterations):
         """
@@ -121,8 +102,6 @@ class DobotControl:
         b = h/math.sqrt(3)
         x1 = np.array([0, -b, b, 0])
         y1 = np.array([h*2/3, -1/3*h, -1/3*h, h*2/3])
-        # y1 = np.array([diameter*3/2*2, diameter/2, diameter/2, diameter*3/2*2])
-        # TODO: Switch to numpy
         x = [[] for i in range(iterations)]
         y = [[] for i in range(iterations)]
         for i in range(iterations):
@@ -140,7 +119,6 @@ class DobotControl:
         a = diameter/2*math.sqrt(2)/2
         x1 = np.array([-a, -a, a, a, -a+step])
         y1 = np.array([-a, a, a, -a+step, -a+step])
-        # TODO: Switch to numpy
         x = [[] for i in range(iterations)]
         y = [[] for i in range(iterations)]
         offset = 0
@@ -151,7 +129,7 @@ class DobotControl:
             offset += step
         return x, y
 
-    def execute_trajectory(self, x_pos, y_pos, api, zstep):
+    def execute_trajectory(self, x_pos, y_pos, api, z_step):
         """
         Executes given trajectory via points
         :param x_pos:
@@ -161,20 +139,14 @@ class DobotControl:
         pos = dType.GetPose(api)
         print(f"Current position of robot: {pos}")
         rHead = 0
-        # dType.SetCPCmd(api, 1, -20 + OFFSET_X, 0, -57 - tool_length, rHead, isQueued=1)[0]
         # Async CPC Motion
         for i in range(len(x_pos)):
             print(f"Current iteration: {i+1}")
             for j in range(len(x_pos[i])):
-                # lastIndex = dType.SetPTPCmd(api, dType.PTPMode.PTPMOVLXYZMode, x_2_list_popr[i] - x + 180, y_2_list_popr[i], 135 - 212 - 0.005*(i-1), rHead, isQueued = 1)[0]
-                # lastIndex = dType.SetCPCmd(api, 1, x_pos[i][j] - 200 + OFFSET_X + WS_OFFSET_X, y_pos[i][j], -57 - tool_length - zstep * (i - 1), rHead, isQueued=1)[0]
                 try:
-                    lastIndex = dType.SetCPCmd(api, 1, + x_pos[i][j+1] + pos[0], y_pos[i][j+1]*3/4 + pos[1], pos[2] - zstep * (i - 1), rHead, isQueued=1)[0]
+                    lastIndex = dType.SetCPCmd(api, 1, + x_pos[i][j+1] + pos[0], y_pos[i][j+1]*3/4 + pos[1], pos[2] - z_step * (i - 1), rHead, isQueued=1)[0]
                 except IndexError:
                     pass
-                # if j==250:
-                #     print(x_pos[i][j] + pos[0], y_pos[i][j]*3/4 + pos[1])
-                # print(f"Current position: {j}")
 
         # Start to Execute Command Queue
         dType.SetQueuedCmdStartExec(api)
@@ -187,8 +159,8 @@ class DobotControl:
         dType.SetQueuedCmdStopExec(api)
 
     def show_plot(self, function, step, diameter, iterations, z_step):
-        ax = plt.figure(figsize=(8,8), num="Planned Trajectory").add_subplot(projection='3d', )
-        N = 5*step/z_step  
+        ax = plt.figure(figsize=(8,8), num="Planned Trajectory").add_subplot(projection='3d')
+        N = 5*0.1/z_step  
         ax.set_box_aspect((N, N, 1))  
         if function == "Spiral":
             x, y = self.spiral(step, diameter, iterations)
@@ -196,15 +168,12 @@ class DobotControl:
             x, y = self.triangle(step, diameter, iterations)
         elif function == "Square":
             x, y = self.square(step, diameter, iterations)
-        else:
-            pass
         for i in range(iterations):
             ax.plot(x[i], y[i], -z_step*i)
         plt.show()
 
     def emergency_stop(self, api):
         dType.SetQueuedCmdStopExec(api)
-        return None
 
 
 class DobotMainWindow(QtWidgets.QMainWindow):
@@ -292,15 +261,3 @@ if __name__ == "__main__":
     w = DobotMainWindow()
     w.show()
     sys.exit(app.exec_())
-
-# if __name__ == '__main__':
-#     dobot = DobotControl()
-#     api = dType.load()
-#     state = dobot.establish_connection(port="COM3", baudrate=115200, api=api)
-#
-#     if (state == dType.DobotConnect.DobotConnect_NoError):
-#         x, y, z, rHead = dobot.home_setup(api, 200, 200)
-#         x_2_list_offset, y_2_list_offset = dobot.spiral(step=LOW_STEP, diameter=60)
-#         #x_2_list_offset, y_2_list_offset = dobot.triangle(step=LOW_STEP)
-#         dobot.execute_trajectory(x_2_list_offset, y_2_list_offset, api, 0.01, 15)
-#     dType.DisconnectDobot(api)
