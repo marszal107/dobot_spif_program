@@ -12,7 +12,7 @@ import array as arr
 from serial.tools import list_ports
 import math
 import time
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtTest
 from main_window import Ui_MainWindow
 from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
 
@@ -211,6 +211,7 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             vel = int(self.ui.velocity_line.text())
             acc = int(self.ui.acceleration_line.text())
             self.ui.home_button.setEnabled(False)
+            QtTest.QTest.qWait(15000)
             self.ui.plan_button.setEnabled(True)
             self.dobot.home_setup(self.api, vel, acc)
         else:
