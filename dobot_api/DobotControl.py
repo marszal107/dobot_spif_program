@@ -204,6 +204,13 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             if self.state == dType.DobotConnect.DobotConnect_NoError:
                 self.ui.connect_button.setEnabled(False)
                 self.ui.home_button.setEnabled(True)
+            elif self.state == dType.DobotConnect.DobotConnect_Occupied:
+                dlg = QMessageBox(self)
+                dlg.setWindowTitle("[ERROR]")
+                dlg.setText("Dobot not connected to the computer")
+                dlg.setStandardButtons(QMessageBox.Ok)
+                dlg.setIcon(QMessageBox.Warning)
+                button = dlg.exec()
             return self.state
         except ValueError:
             self.error_dialog("baudrate")     
