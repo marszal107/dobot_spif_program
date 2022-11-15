@@ -14,7 +14,7 @@ import math
 import time
 from PyQt5 import QtCore, QtGui, QtWidgets, QtTest
 from main_window import Ui_MainWindow
-from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout, QMessageBox
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -62,7 +62,6 @@ class DobotControl:
 
         # Async Home
         dType.SetHOMECmd(api, temp=0, isQueued=1)
-        w.ui.show_button.setEnabled(False)
 
     def spiral(self, step, diameter, iterations):
         """
@@ -199,47 +198,62 @@ class DobotMainWindow(QtWidgets.QMainWindow):
 
     def connect_click_event(self):
         port = self.ui.port_line.text()
-        baudrate = int(self.ui.baudrate_line.text())
-        self.state = self.dobot.establish_connection(port=port, baudrate=baudrate, api=self.api)
-        if self.state == dType.DobotConnect.DobotConnect_NoError:
-            self.ui.connect_button.setEnabled(False)
-            self.ui.home_button.setEnabled(True)
-        return self.state
+        try:
+            baudrate = int(self.ui.baudrate_line.text())
+            self.state = self.dobot.establish_connection(port=port, baudrate=baudrate, api=self.api)
+            if self.state == dType.DobotConnect.DobotConnect_NoError:
+                self.ui.connect_button.setEnabled(False)
+                self.ui.home_button.setEnabled(True)
+            return self.state
+        except ValueError:
+            self.error_dialog("baudrate")     
 
     def home_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            vel = int(self.ui.velocity_line.text())
-            acc = int(self.ui.acceleration_line.text())
-            self.ui.home_button.setEnabled(False)
-            QtTest.QTest.qWait(15000)
-            self.ui.plan_button.setEnabled(True)
-            self.dobot.home_setup(self.api, vel, acc)
+            try:
+                vel = int(self.ui.velocity_line.text())
+                acc = int(self.ui.acceleration_line.text())
+                self.ui.home_button.setEnabled(False)
+                self.dobot.home_setup(self.api, vel, acc)
+                QtTest.QTest.qWait(15000)
+                self.ui.plan_button.setEnabled(True)
+            except:
+                self.error_dialog("setup")
         else:
             log.fatal("[ERROR] Robot not connected")
 
     def plan_click_event(self):
         x_list, y_list = None, None
-        diameter = int(self.ui.diameter_line.text())
-        xy_step = float(self.ui.xystep_line.text())
-        iterations = int(self.ui.iterations_line.text())
-        if self.ui.shapeComboBox.currentText() == "Spiral":
-            x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter, iterations=iterations)
-        elif self.ui.shapeComboBox.currentText() == "Triangle":
-            x_list, y_list = self.dobot.triangle(step=xy_step, diameter=diameter, iterations=iterations)
-        elif self.ui.shapeComboBox.currentText() == "Square":
-            x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter, iterations=iterations)
-        self.ui.show_button.setEnabled(True)
-        if self.state == dType.DobotConnect.DobotConnect_NoError:
-            self.ui.execute_button.setEnabled(True)
-        return x_list, y_list
+        try:
+            diameter = int(self.ui.diameter_line.text())
+            xy_step = float(self.ui.xystep_line.text())
+            z_step = float(self.ui.zstep_line.text())
+            iterations = int(self.ui.iterations_line.text())
+        except:
+            self.error_dialog("trajectory")
+        else:
+            if self.ui.shapeComboBox.currentText() == "Spiral":
+                x_list, y_list = self.dobot.spiral(step=xy_step, diameter=diameter, iterations=iterations)
+            elif self.ui.shapeComboBox.currentText() == "Triangle":
+                x_list, y_list = self.dobot.triangle(step=xy_step, diameter=diameter, iterations=iterations)
+            elif self.ui.shapeComboBox.currentText() == "Square":
+                x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter, iterations=iterations)
+            self.ui.show_button.setEnabled(True)
+            if self.state == dType.DobotConnect.DobotConnect_NoError:
+                self.ui.execute_button.setEnabled(True)
+            return x_list, y_list
 
     def execute_click_event(self):
         x_list, y_list = self.plan_click_event()
-        zstep = float(self.ui.zstep_line.text())
-        if (self.state == dType.DobotConnect.DobotConnect_NoError):
-            self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
+        try:
+            zstep = float(self.ui.zstep_line.text())
+        except:
+            self.error_dialog("trajectory")
         else:
-            print("[ERROR] Robot not connected")
+            if (self.state == dType.DobotConnect.DobotConnect_NoError):
+                self.dobot.execute_trajectory(x_list, y_list, self.api, zstep)
+            else:
+                print("[ERROR] Robot not connected")
 
     def estop_click_event(self):
         if (self.state == dType.DobotConnect.DobotConnect_NoError):
@@ -254,21 +268,31 @@ class DobotMainWindow(QtWidgets.QMainWindow):
             print("[ERROR] Robot not connected")
 
     def show_click_event(self):
-        xystep = float(self.ui.xystep_line.text())
-        diameter = float(self.ui.diameter_line.text())
-        iterations = int(self.ui.iterations_line.text())
-        z_step = float(self.ui.zstep_line.text())
-
-        if self.ui.shapeComboBox.currentText() == "Spiral":
-            self.dobot.show_plot("Spiral", xystep, diameter, iterations, z_step)
-        elif self.ui.shapeComboBox.currentText() == "Triangle":
-            self.dobot.show_plot("Triangle", xystep, diameter, iterations, z_step)
-        elif self.ui.shapeComboBox.currentText() == "Square":
-            self.dobot.show_plot("Square", xystep, diameter, iterations, z_step)
+        try:
+            xystep = float(self.ui.xystep_line.text())
+            diameter = float(self.ui.diameter_line.text())
+            iterations = int(self.ui.iterations_line.text())
+            z_step = float(self.ui.zstep_line.text())
+        except:
+            self.error_dialog("trajectory")
         else:
-            pass
-
-
+            if self.ui.shapeComboBox.currentText() == "Spiral":
+                self.dobot.show_plot("Spiral", xystep, diameter, iterations, z_step)
+            elif self.ui.shapeComboBox.currentText() == "Triangle":
+                self.dobot.show_plot("Triangle", xystep, diameter, iterations, z_step)
+            elif self.ui.shapeComboBox.currentText() == "Square":
+                self.dobot.show_plot("Square", xystep, diameter, iterations, z_step)
+            else:
+                pass
+    
+    def error_dialog(self, s):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("[ERROR]")
+        dlg.setText(f"Entered wrong {s} value(s)")
+        dlg.setStandardButtons(QMessageBox.Ok)
+        dlg.setIcon(QMessageBox.Warning)
+        button = dlg.exec()
+    
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
