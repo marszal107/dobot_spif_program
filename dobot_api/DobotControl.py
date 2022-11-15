@@ -193,7 +193,7 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         self.dobot = DobotControl()
         self.state = None
         self.ui.home_button.setEnabled(False)
-        self.ui.plan_button.setEnabled(False)
+        # self.ui.plan_button.setEnabled(False)
         self.ui.show_button.setEnabled(False)
         self.ui.execute_button.setEnabled(False)
 
@@ -229,7 +229,8 @@ class DobotMainWindow(QtWidgets.QMainWindow):
         elif self.ui.shapeComboBox.currentText() == "Square":
             x_list, y_list = self.dobot.square(step=xy_step, diameter=diameter, iterations=iterations)
         self.ui.show_button.setEnabled(True)
-        self.ui.execute_button.setEnabled(True)
+        if self.state == dType.DobotConnect.DobotConnect_NoError:
+            self.ui.execute_button.setEnabled(True)
         return x_list, y_list
 
     def execute_click_event(self):
